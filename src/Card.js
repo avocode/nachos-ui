@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import React from 'react'
+import PropTypes from 'prop-types'
 import { View, Image } from 'react-native'
 import P from './typography/P'
 import themeManager from './themeManager'
