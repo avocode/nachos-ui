@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "md5": "^2.2.1",
+    "prop-types": "^15.5.10",
     "query-string": "^4.3.1",
     "react": "15.x.x",
     "react-native": ">=0.40.0",
