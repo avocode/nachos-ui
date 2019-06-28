@@ -43,7 +43,9 @@ export class Provider extends Component {
   componentWillUpdate(nextProps, nextState) {
     const { branding } = nextProps;
     if (branding !== this.props.branding) {
-      this.branding = mergeDeep(this.branding, branding);
+      // XXX: Cloning the branding is required because we don't use
+      //      setState to drive an update.
+      this.branding = { ...mergeDeep(this.branding, branding) };
     }
   }
 
@@ -52,7 +54,8 @@ export class Provider extends Component {
       <ThemeContext.Provider
         value={{
           theme: this.themeConfigs,
-          updateThemeConfig: this.updateThemeConfig
+          updateThemeConfig: this.updateThemeConfig,
+          branding: this.branding,
         }}
       >
         {this.props.children}
@@ -75,48 +78,75 @@ export function withTheme(componentName, ThemedComponent) {
     static defaultProps = {
       ...ThemedComponent.defaultProps
     };
-    constructor() {
-      super();
-      this.__attemptUpdateTheme();
-    }
-    __attemptUpdateTheme() {
-      try {
-        if (ThemeContext._currentValue.updateThemeConfig) {
-          ThemeContext._currentValue.updateThemeConfig(
-            componentName,
-            ThemedComponent.themeConfig
-          );
-        }
-      } catch (e) {
-        console.warn(`failed to update theme for ${componentName}`, e);
-      }
-    }
-    componentWillUpdate(nextProps, nextState) {
-      this.__attemptUpdateTheme();
-    }
     render() {
       return (
         <ThemeContext.Consumer>
-          {({ theme }) => {
-            const computedTheme =
-              (theme[componentName] || {}).computedStyle || {};
-
-            const fullTheme = this.props.theme
-              ? mergeDeep({}, computedTheme, this.props.theme)
-              : computedTheme;
-
-            return (
-              <ThemedComponent
-                {...(theme[componentName] || {}).props || {}}
-                {...this.props}
-                theme={fullTheme}
-              />
-            );
-          }}
+          {({ theme, branding }) => (
+            <ThemeConsumerBase
+              theme={theme}
+              branding={branding}
+              componentName={componentName}
+              ThemedComponent={ThemedComponent}
+              {...this.props}
+            />
+          )}
         </ThemeContext.Consumer>
       );
     }
   };
+}
+
+class ThemeConsumerBase extends React.Component {
+  constructor(props) {
+    super(props);
+    this.__attemptUpdateTheme();
+  }
+  __attemptUpdateTheme() {
+    const {
+      componentName,
+      ThemedComponent,
+    } = this.props;
+    try {
+      if (ThemeContext._currentValue.updateThemeConfig) {
+        ThemeContext._currentValue.updateThemeConfig(
+          componentName,
+          ThemedComponent.themeConfig
+        );
+      }
+    } catch (e) {
+      console.warn(`failed to update theme for ${componentName}`, e);
+    }
+  }
+  componentWillUpdate(nextProps, nextState) {
+    const { branding } = nextProps;
+    if (branding !== this.props.branding) {
+      this.__attemptUpdateTheme();
+    }
+  }
+  render() {
+    const {
+      branding,
+      theme,
+      componentName,
+      ThemedComponent,
+      ...extraProps
+    } = this.props;
+
+    const computedTheme =
+      (theme[componentName] || {}).computedStyle || {};
+
+    const fullTheme = this.props.theme
+      ? mergeDeep({}, computedTheme, this.props.theme)
+      : computedTheme;
+
+    return (
+      <ThemedComponent
+        {...(theme[componentName] || {}).props || {}}
+        {...extraProps}
+        theme={fullTheme}
+      />
+    );
+  }
 }
 
 function mergeDeep(target, ...sources) {
