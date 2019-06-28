@@ -5,7 +5,7 @@ import defaultBranding from "../../branding_defaults";
 import isObject from "is-obj";
 
 export const ThemeContext = React.createContext({
-  theme: {}
+  theme: {},
 });
 
 export class Provider extends Component {
@@ -18,7 +18,6 @@ export class Provider extends Component {
       this.branding = mergeDeep(this.branding, props.branding);
     }
   }
-
   updateThemeConfig = (name, themeConfig) => {
     if (this.props.theme && this.props.theme[name])
       themeConfig = mergeDeep(themeConfig, this.props.theme[name]);
@@ -40,6 +39,13 @@ export class Provider extends Component {
       props: themeConfig.props
     });
   };
+
+  componentWillUpdate(nextProps, nextState) {
+    const { branding } = nextProps;
+    if (branding !== this.props.branding) {
+      this.branding = mergeDeep(this.branding, branding);
+    }
+  }
 
   render() {
     return (
@@ -71,6 +77,9 @@ export function withTheme(componentName, ThemedComponent) {
     };
     constructor() {
       super();
+      this.__attemptUpdateTheme();
+    }
+    __attemptUpdateTheme() {
       try {
         if (ThemeContext._currentValue.updateThemeConfig) {
           ThemeContext._currentValue.updateThemeConfig(
@@ -82,7 +91,10 @@ export function withTheme(componentName, ThemedComponent) {
         console.warn(`failed to update theme for ${componentName}`, e);
       }
     }
-
+    componentWillUpdate(nextProps, nextState) {
+      // TODO: find the right way to do this
+      this.__attemptUpdateTheme();
+    }
     render() {
       return (
         <ThemeContext.Consumer>
