@@ -92,7 +92,6 @@ export function withTheme(componentName, ThemedComponent) {
       }
     }
     componentWillUpdate(nextProps, nextState) {
-      // TODO: find the right way to do this
       this.__attemptUpdateTheme();
     }
     render() {
