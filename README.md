@@ -32,7 +32,7 @@ $ yarn add nachos-ui
 
 The ThemeProvider component should be set at the highest level of your app. If it is not, Nachos UI components will NOT render.
 
-```
+```jsx
 import { ThemeProvider } from "nachos-ui";
 
 export default (App = () => (
@@ -95,11 +95,22 @@ To run the Web version:
 ```
 $ yarn run start:web
 ```
+## README Badge
 
+Using Nachos-UI? Add a README badge to let everyone know: 
+
+
+[![Nachos-UI](https://img.shields.io/badge/powered%20by-Nachos--UI-%23212121)](https://github.com/nachos-ui/nachos-ui)
+
+```markdown
+[![Nachos-UI](https://img.shields.io/badge/powered%20by-Nachos--UI-%23212121)](https://github.com/nachos-ui/nachos-ui)
+
+```
 
 ## License
 
 Nachos UI is open source and released under the [MIT License](https://github.com/avocode/nachos-ui/blob/master/LICENSE).
+
 
 ## Thanks!
 
